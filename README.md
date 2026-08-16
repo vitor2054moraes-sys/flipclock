@@ -47,7 +47,7 @@ flip-clock/
 3. No repositório, vá em **Settings → Pages**.
 4. Em *Source*, selecione **Deploy from a branch**.
 5. Escolha a branch `main` e a pasta `/ (root)`. Salve.
-6. Após ~1 minuto o site estará em `https://SEU-USUARIO.github.io/flip-clock/`.
+6. Após ~1 minuto o site estará em `https://vitor2054moraes-sys.github.io/flip-clock/`.
 
 > O `index.html` precisa estar na raiz do repositório para o Pages servi-lo automaticamente.
 
