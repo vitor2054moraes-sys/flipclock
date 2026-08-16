@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flip Clock</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="tabs">
+    <button class="tab active" data-panel="clock">Relógio</button>
+    <button class="tab" data-panel="stopwatch">Cronômetro</button>
+    <button class="tab" data-panel="timer">Temporizador</button>
+  </nav>
+
+  <!-- ================= RELÓGIO ================= -->
+  <section class="panel active" id="clock">
+    <div class="flip-row">
+      <span class="meridiem" id="meridiem">AM</span>
+
+      <div class="flip-card" id="c-h">
+        <div class="top">00</div>
+        <div class="bottom">00</div>
+        <div class="flip-top">00</div>
+        <div class="flip-bottom">00</div>
+      </div>
+
+      <div class="flip-card" id="c-m">
+        <div class="top">00</div>
+        <div class="bottom">00</div>
+        <div class="flip-top">00</div>
+        <div class="flip-bottom">00</div>
+      </div>
+
+      <div class="seconds" id="c-s">00</div>
+    </div>
+
+    <button class="format-toggle" id="formatToggle">24h</button>
+  </section>
+
+  <!-- ================= CRONÔMETRO ================= -->
+  <section class="panel" id="stopwatch">
+    <div class="digital" id="swDisplay">00:00<span class="ms">.00</span></div>
+    <div class="controls">
+      <button id="swStart">Iniciar</button>
+      <button id="swLap">Volta</button>
+      <button id="swReset">Zerar</button>
+    </div>
+    <ol class="laps" id="swLaps"></ol>
+  </section>
+
+  <!-- ================= TEMPORIZADOR ================= -->
+  <section class="panel" id="timer">
+    <div class="digital" id="tmDisplay">00:00:00</div>
+
+    <div class="timer-inputs" id="tmInputs">
+      <input type="number" id="tmH" min="0" max="99" placeholder="hh">
+      <span>:</span>
+      <input type="number" id="tmM" min="0" max="59" placeholder="mm">
+      <span>:</span>
+      <input type="number" id="tmS" min="0" max="59" placeholder="ss">
+    </div>
+
+    <div class="presets">
+      <button data-min="1">1 min</button>
+      <button data-min="5">5 min</button>
+      <button data-min="10">10 min</button>
+      <button data-min="25">25 min</button>
+    </div>
+
+    <div class="controls">
+      <button id="tmStart">Iniciar</button>
+      <button id="tmReset">Zerar</button>
+      <button id="tmStop" class="hidden">Parar alarme</button>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
