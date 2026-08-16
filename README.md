@@ -2,7 +2,7 @@
 
 Relógio analógico clássico de abas (*flip clock*) em HTML, CSS e JavaScript puro — fundo escuro, números brancos e animação de virada 3D real.
 
-**Demo:** https://SEU-USUARIO.github.io/flip-clock/
+**Demo:** https://vitor2054moraes-sys.github.io/flip-clock/
 
 ---
 
