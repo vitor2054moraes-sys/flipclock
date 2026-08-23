@@ -8,6 +8,8 @@
 </head>
 <body>
 
+<div class="wrap">
+
   <nav class="tabs">
     <button class="tab active" data-panel="clock">Relógio</button>
     <button class="tab" data-panel="stopwatch">Cronômetro</button>
@@ -16,8 +18,8 @@
 
   <!-- ================= RELÓGIO ================= -->
   <section class="panel active" id="clock">
-    <div class="flip-row">
-      <span class="meridiem" id="meridiem">AM</span>
+    <div class="clock">
+      <span id="meridiem">AM</span>
 
       <div class="flip-card" id="c-h">
         <div class="top">00</div>
@@ -36,17 +38,19 @@
       <div class="seconds" id="c-s">00</div>
     </div>
 
-    <button class="format-toggle" id="formatToggle">24h</button>
+    <button id="formatToggle">24h</button>
   </section>
 
   <!-- ================= CRONÔMETRO ================= -->
   <section class="panel" id="stopwatch">
     <div class="digital" id="swDisplay">00:00<span class="ms">.00</span></div>
+
     <div class="controls">
-      <button id="swStart">Iniciar</button>
+      <button id="swStart" class="primary">Iniciar</button>
       <button id="swLap">Volta</button>
       <button id="swReset">Zerar</button>
     </div>
+
     <ol class="laps" id="swLaps"></ol>
   </section>
 
@@ -70,12 +74,14 @@
     </div>
 
     <div class="controls">
-      <button id="tmStart">Iniciar</button>
+      <button id="tmStart" class="primary">Iniciar</button>
       <button id="tmReset">Zerar</button>
-      <button id="tmStop" class="hidden">Parar alarme</button>
+      <button id="tmStop" class="danger hidden">Parar alarme</button>
     </div>
   </section>
 
-  <script src="script.js"></script>
+</div>
+
+<script src="script.js" defer></script>
 </body>
 </html>
