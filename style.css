@@ -10,7 +10,7 @@ html, body {
 }
 
 .wrap {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 32px 20px 60px;
   display: flex;
@@ -49,7 +49,7 @@ html, body {
 
 .flip-card {
   position: relative;
-  width: 180px;
+  width: 300px;
   height: 240px;
   border-radius: 16px;
   background: #1c1c1c;
@@ -187,7 +187,13 @@ button.danger  { border-color: #7a2222; color: #ff8a8a; }
 }
 
 @media (max-width: 640px) {
-  .flip-card { width: 110px; height: 150px; font-size: 118px; line-height: 150px; }
+  .flip-card { width: 150px; height: 120px; font-size: 95px; }
+
+  .flip-card > div > span { height: 120px; line-height: 120px; }
+
+  .flip-card .bottom > span,
+  .flip-card .flip-bottom > span { transform: translateY(-60px); }
+
   .digital { font-size: 54px; padding: 18px 24px; }
-  .seconds { font-size: 34px; }
+  .seconds { font-size: 34px; padding-bottom: 10px; }
 }
