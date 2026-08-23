@@ -1,303 +1,44 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --bg: #000;
-  --card: #101010;
-  --card-hi: #1a1a1a;
-  --txt: #f2f2f2;
-  --dim: #555;
-  --gap: 3px;
-}
-
-body {
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--txt);
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-weight: 700;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 48px;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ---------- ABAS ---------- */
-.tabs {
-  position: fixed;
-  top: 24px;
-  display: flex;
-  gap: 4px;
-  background: #0a0a0a;
-  border: 1px solid #1e1e1e;
-  border-radius: 8px;
-  padding: 4px;
-  z-index: 10;
-}
-.tab {
-  background: none;
-  border: 0;
-  color: var(--dim);
-  font: 700 13px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  letter-spacing: .04em;
-  padding: 8px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: .2s;
-}
-.tab:hover { color: #999; }
-.tab.active { background: #1c1c1c; color: var(--txt); }
-
-/* ---------- PAINÉIS ---------- */
-.panel {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-}
-.panel.active { display: flex; }
-.hidden { display: none !important; }
-
-/* ================= FLIP CLOCK ================= */
-.flip-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  position: relative;
-}
-
-.meridiem {
-  font-size: clamp(14px, 2.2vw, 26px);
-  letter-spacing: -.02em;
-  align-self: flex-start;
-  margin-top: 6px;
-  transform: scaleX(.62);
-  transform-origin: right center;
-}
-
-.seconds {
-  font-size: clamp(24px, 4vw, 46px);
-  color: #b8b8b8;
-  align-self: flex-end;
-  margin-bottom: 10px;
-  font-variant-numeric: tabular-nums;
-}
-
-/* --- cartão --- */
 .flip-card {
   position: relative;
-  width: clamp(120px, 20vw, 260px);
-  height: clamp(160px, 26vw, 340px);
-  font-size: clamp(130px, 22vw, 290px);
+  width: 150px;
+  height: 220px;
+  perspective: 700px;
+  font-size: 140px;
   line-height: 1;
-  border-radius: 14px;
-  perspective: 1200px;
+  font-weight: 700;
+  border-radius: 12px;
 }
 
 .flip-card > div {
   position: absolute;
-  left: 0;
-  width: 100%;
+  left: 0; right: 0;
   height: 50%;
   overflow: hidden;
-  background: var(--card);
+  background: #1b1b1b;
+  color: #f2f2f2;
   display: flex;
   justify-content: center;
   backface-visibility: hidden;
 }
 
-.flip-card .top,
-.flip-card .flip-top {
-  top: 0;
-  align-items: flex-start;
-  border-radius: 14px 14px 0 0;
-  background: linear-gradient(180deg, var(--card-hi), var(--card));
-}
-.flip-card .top > *,
-.flip-card .flip-top,
-.flip-card .top { }
+.flip-card .top,    .flip-card .flip-top    { top: 0;    align-items: flex-start; border-radius: 12px 12px 0 0; }
+.flip-card .bottom, .flip-card .flip-bottom { bottom: 0; align-items: flex-end;   border-radius: 0 0 12px 12px; }
 
-.flip-card .top span,
-.flip-card .flip-top span { }
+/* o truque: cada metade mostra metade do glifo */
+.flip-card .top span, .flip-card .flip-top span { display: block; }
+.flip-card .bottom, .flip-card .flip-bottom { line-height: 0; }
+.flip-card .top, .flip-card .flip-top { line-height: 220px; }
+.flip-card .bottom, .flip-card .flip-bottom { line-height: 0px; }
 
-.flip-card .top,
-.flip-card .flip-top { border-bottom: 1px solid #000; }
-
-.flip-card .bottom,
-.flip-card .flip-bottom {
-  bottom: 0;
-  align-items: flex-end;
-  border-radius: 0 0 14px 14px;
-  background: linear-gradient(180deg, #0d0d0d, #151515);
-}
-
-/* alinhamento do glifo: metade de cima mostra topo do número */
-.flip-card .top,
-.flip-card .flip-top { line-height: 1; }
-.flip-card .top,
-.flip-card .flip-top { padding-top: 0; }
-
-.flip-card .bottom,
-.flip-card .flip-bottom { line-height: 1; }
-
-/* truque: número inteiro renderizado e cortado pelo overflow */
-.flip-card .top,
-.flip-card .flip-top {
-  align-items: flex-start;
-}
-.flip-card .bottom,
-.flip-card .flip-bottom {
-  align-items: flex-start;
-}
-.flip-card .bottom,
-.flip-card .flip-bottom {
-  text-indent: 0;
-}
-.flip-card .bottom,
-.flip-card .flip-bottom {
-  /* desloca o glifo para cima em 50% da altura do cartão */
-  padding-top: 0;
-}
-.flip-card .bottom::before,
-.flip-card .flip-bottom::before { content: none; }
-
-/* aplica o deslocamento real via transform no conteúdo textual */
-.flip-card .bottom,
-.flip-card .flip-bottom {
-  transform-origin: center top;
-}
-
-/* --- camadas de animação --- */
-.flip-card .flip-top,
-.flip-card .flip-bottom {
-  z-index: 3;
-  transform-origin: bottom center;
-  display: none;
-}
-.flip-card .flip-bottom { transform-origin: top center; }
-
-.flip-card.flipping .flip-top,
-.flip-card.flipping .flip-bottom { display: flex; }
-
+.flip-card .flip-top, .flip-card .flip-bottom { z-index: 2; display: none; }
 .flip-card.flipping .flip-top {
-  animation: flipTop .3s cubic-bezier(.37,.01,.94,.35) forwards;
+  display: flex; transform-origin: bottom;
+  animation: flipTop .3s ease-in forwards;
 }
 .flip-card.flipping .flip-bottom {
-  animation: flipBottom .3s .3s cubic-bezier(.15,.45,.28,1) forwards;
+  display: flex; transform-origin: top;
+  animation: flipBottom .3s .3s ease-out forwards;
 }
 
-@keyframes flipTop {
-  0%   { transform: rotateX(0deg);   filter: brightness(1); }
-  100% { transform: rotateX(-90deg); filter: brightness(.45); }
-}
-@keyframes flipBottom {
-  0%   { transform: rotateX(90deg);  filter: brightness(.45); }
-  100% { transform: rotateX(0deg);   filter: brightness(1); }
-}
-
-/* sombra da dobra */
-.flip-card::after {
-  content: "";
-  position: absolute;
-  left: 0; top: 50%;
-  width: 100%; height: 1px;
-  background: rgba(0,0,0,.9);
-  z-index: 4;
-  pointer-events: none;
-}
-
-/* ---------- botão de formato ---------- */
-.format-toggle {
-  background: #131313;
-  border: 1px solid #242424;
-  color: #888;
-  font: 700 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  letter-spacing: .06em;
-  padding: 7px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: .2s;
-}
-.format-toggle:hover { color: var(--txt); border-color: #3a3a3a; }
-
-/* ================= CRONÔMETRO / TIMER ================= */
-.digital {
-  font-size: clamp(56px, 11vw, 150px);
-  letter-spacing: -.03em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-.digital .ms { font-size: .45em; color: #7d7d7d; }
-.digital.alerting { animation: pulse .5s steps(1) infinite; }
-@keyframes pulse { 50% { opacity: .15; } }
-
-.controls { display: flex; gap: 10px; }
-.controls button,
-.presets button {
-  background: #141414;
-  border: 1px solid #262626;
-  color: var(--txt);
-  font: 700 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  padding: 11px 26px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: .18s;
-}
-.controls button:hover,
-.presets button:hover { background: #202020; border-color: #3d3d3d; }
-.controls button:active,
-.presets button:active { transform: scale(.96); }
-
-.presets { display: flex; gap: 8px; }
-.presets button { padding: 8px 16px; font-size: 12px; color: #9a9a9a; }
-
-.timer-inputs {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 26px;
-  color: var(--dim);
-}
-.timer-inputs input {
-  width: 82px;
-  background: #0f0f0f;
-  border: 1px solid #232323;
-  border-radius: 8px;
-  color: var(--txt);
-  font: 700 26px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  text-align: center;
-  padding: 10px 4px;
-  outline: none;
-  -moz-appearance: textfield;
-}
-.timer-inputs input::-webkit-outer-spin-button,
-.timer-inputs input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.timer-inputs input:focus { border-color: #4a4a4a; }
-
-/* ---------- voltas ---------- */
-.laps {
-  list-style: none;
-  max-height: 190px;
-  overflow-y: auto;
-  width: min(90vw, 340px);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
-.laps li {
-  display: flex;
-  justify-content: space-between;
-  padding: 9px 12px;
-  border-bottom: 1px solid #171717;
-  color: #b0b0b0;
-}
-.laps li span:first-child { color: var(--dim); }
-.laps::-webkit-scrollbar { width: 5px; }
-.laps::-webkit-scrollbar-thumb { background: #262626; border-radius: 3px; }
-
-@media (max-width: 600px) {
-  body { gap: 30px; }
-  .flip-row { gap: 8px; }
-  .tabs { top: 14px; }
-}
+@keyframes flipTop    { to { transform: rotateX(-90deg); } }
+@keyframes flipBottom { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
