@@ -185,15 +185,23 @@ button.danger  { border-color: #7a2222; color: #ff8a8a; }
   color: #bbb;
   font-size: 16px;
 }
-
 @media (max-width: 640px) {
-  .flip-card { width: 150px; height: 120px; font-size: 95px; }
+  .flip-card { width: 150px; height: 120px; font-size: 78px; }
 
-  .flip-card > div > span { height: 120px; line-height: 120px; }
+  .flip-card > div { display: block; }          /* garante o clip */
+
+  .flip-card > div > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;                              /* = height do card */
+    line-height: 1;
+  }
 
   .flip-card .bottom > span,
-  .flip-card .flip-bottom > span { transform: translateY(-60px); }
+  .flip-card .flip-bottom > span { margin-top: -60px; }  /* metade */
 
+  .clock   { gap: 8px; }
+  .seconds { font-size: 34px; padding-bottom: 8px; }
   .digital { font-size: 54px; padding: 18px 24px; }
-  .seconds { font-size: 34px; padding-bottom: 10px; }
 }
