@@ -28,26 +28,7 @@ flip-clock/
 
 ---
 
-## 🚀 Publicando no GitHub Pages
 
-1. Crie um repositório novo (ex.: `flip-clock`).
-2. Envie os arquivos:
-
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: flip clock com relógio, cronômetro e temporizador"
-   git branch -M main
-   git remote add origin https://github.com/SEU-USUARIO/flip-clock.git
-   git push -u origin main
-   ```
-
-3. No repositório, vá em **Settings → Pages**.
-4. Em *Source*, selecione **Deploy from a branch**.
-5. Escolha a branch `main` e a pasta `/ (root)`. Salve.
-6. Após ~1 minuto o site estará em `https://vitor2054moraes-sys.github.io/flip-clock/`.
-
-> O `index.html` precisa estar na raiz do repositório para o Pages servi-lo automaticamente.
 
 ### Rodando localmente
 
@@ -82,5 +63,3 @@ Edite as variáveis no topo do `style.css`:
   --txt:     #f2f2f2;  /* cor dos números     */
 }
 ```
-
-Para mudar a **velocidade da
