@@ -1,24 +1,36 @@
+"use strict";
 /* ==========================================================
-   FLIP CLOCK — Relógio · Cronômetro · Temporizador
+   VIRADA — Relógio de virar · Cronômetro · Temporizador
+   Tudo conta pela hora do aparelho (nunca "um tique por vez"), então nada atrasa com a aba em segundo plano.
+   A tela é montada pelo DOM (sem innerHTML).
    ========================================================== */
 
 const pad = (n, l = 2) => String(n).padStart(l, "0");
-const $   = id => document.getElementById(id);
-const on  = (id, fn) => { const el = $(id); if (el) el.addEventListener("click", fn); };
+const $ = (id) => document.getElementById(id);
+const on = (id, fn) => $(id)?.addEventListener("click", fn);
+
+function ler(chave, padrao) {
+  try { return JSON.parse(localStorage.getItem(chave)) ?? padrao; } catch { return padrao; }
+}
+function gravar(chave, valor) {
+  try { localStorage.setItem(chave, JSON.stringify(valor)); } catch { /* sem armazenamento: só não lembra */ }
+}
 
 /* ---------- ABAS ---------- */
-document.querySelectorAll(".tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-    tab.classList.add("active");
-    const panel = $(tab.dataset.panel);
-    if (panel) panel.classList.add("active");
-  });
-});
+let painelAberto = "clock";
+function abrirPainel(id) {
+  painelAberto = id;
+  for (const t of document.querySelectorAll(".tab")) {
+    const ativa = t.dataset.panel === id;
+    t.classList.toggle("active", ativa);
+    t.setAttribute("aria-selected", String(ativa));
+  }
+  for (const p of document.querySelectorAll(".panel")) p.classList.toggle("active", p.id === id);
+}
+for (const t of document.querySelectorAll(".tab")) t.addEventListener("click", () => abrirPainel(t.dataset.panel));
 
 /* ==========================================================
-   ÁUDIO — beep-beep-beep
+   ÁUDIO — bip-bip-bip (um canal de som só, reaproveitado)
    ========================================================== */
 class Beeper {
   constructor() { this.ctx = null; this.loop = null; }
@@ -50,35 +62,35 @@ class Beeper {
     const fire = () => {
       const t = ctx.currentTime + 0.02;
       this.beep(t); this.beep(t + 0.17); this.beep(t + 0.34);
+      navigator.vibrate?.([90, 80, 90, 80, 90]);
     };
     fire();
     this.loop = setInterval(fire, 1100);
   }
 
   stop() { if (this.loop) { clearInterval(this.loop); this.loop = null; } }
+  get tocando() { return this.loop !== null; }
 }
 const beeper = new Beeper();
 
 /* ==========================================================
    1. RELÓGIO
    ========================================================== */
-let use24 = true;
+let use24 = ler("virada.formato24", true) !== false;   // a escolha 12h/24h fica guardada
 
 function flip(card, value) {
-  if (!card) return;
-  const top = card.querySelector(".top");
+  const top = card?.querySelector(".top");
   if (!top || top.textContent === value) return;
-
-  const bottom  = card.querySelector(".bottom");
-  const fTop    = card.querySelector(".flip-top");
+  const bottom = card.querySelector(".bottom");
+  const fTop = card.querySelector(".flip-top");
   const fBottom = card.querySelector(".flip-bottom");
 
-  fTop.textContent    = top.textContent;   // valor antigo cai
-  fBottom.textContent = value;             // valor novo sobe
-  top.textContent     = value;
+  fTop.textContent = top.textContent;   // o número antigo cai
+  fBottom.textContent = value;          // o novo sobe
+  top.textContent = value;
 
   card.classList.remove("flipping");
-  void card.offsetWidth;                   // reinicia animação
+  void card.offsetWidth;                // reinicia a animação
   card.classList.add("flipping");
 
   setTimeout(() => {
@@ -87,6 +99,7 @@ function flip(card, value) {
   }, 620);
 }
 
+let ultimaLida = "";
 function tickClock() {
   const d = new Date();
   let h = d.getHours();
@@ -95,20 +108,45 @@ function tickClock() {
 
   flip($("c-h"), pad(h));
   flip($("c-m"), pad(d.getMinutes()));
+  $("c-s").textContent = pad(d.getSeconds());
+  $("meridiem").textContent = mer;
+  $("meridiem").classList.toggle("escondido", use24);
+  $("data").textContent = d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
-  const sec = $("c-s");
-  if (sec) sec.textContent = pad(d.getSeconds());
-
-  const m = $("meridiem");
-  if (m) { m.textContent = mer; m.style.visibility = use24 ? "hidden" : "visible"; }
+  // Para o leitor de tela: a hora uma vez por minuto (os cartões de virar ficam escondidos dele).
+  const lida = `${pad(h)}:${pad(d.getMinutes())}${use24 ? "" : ` ${mer}`}`;
+  if (lida !== ultimaLida) { ultimaLida = lida; $("horaLida").textContent = `São ${lida}`; }
 }
 
-on("formatToggle", e => {
+function mostrarFormato() {
+  $("formatToggle").textContent = use24 ? "24h" : "12h";
+}
+on("formatToggle", () => {
   use24 = !use24;
-  e.currentTarget.textContent = use24 ? "24h" : "12h";
+  gravar("virada.formato24", use24);
+  mostrarFormato();
   tickClock();
 });
 
+// Tela cheia (relógio de mesa) e a tela acesa enquanto isso, onde o navegador deixa.
+let trava = null;
+on("telaCheia", async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch { /* o navegador não deixou */ }
+});
+document.addEventListener("fullscreenchange", async () => {
+  const cheia = Boolean(document.fullscreenElement);
+  $("telaCheia").textContent = cheia ? "Sair da tela cheia" : "Tela cheia";
+  document.body.classList.toggle("cheia", cheia);
+  try {
+    if (cheia) trava = await navigator.wakeLock?.request("screen");
+    else { await trava?.release(); trava = null; }
+  } catch { trava = null; }
+});
+
+mostrarFormato();
 tickClock();
 setInterval(tickClock, 250);
 
@@ -117,23 +155,19 @@ setInterval(tickClock, 250);
    ========================================================== */
 let swT0 = 0, swAcc = 0, swRaf = null, swLapCount = 0;
 
-const fmtSw = ms => {
-  const cs = Math.floor(ms / 10) % 100;
-  const s  = Math.floor(ms / 1000) % 60;
-  const m  = Math.floor(ms / 60000);
-  return `${pad(m)}:${pad(s)}<span class="ms">.${pad(cs)}</span>`;
-};
+// [mm:ss, centésimos]
+const partesSw = (ms) => [`${pad(Math.floor(ms / 60000))}:${pad(Math.floor(ms / 1000) % 60)}`, `.${pad(Math.floor(ms / 10) % 100)}`];
+const tempoSw = (ms) => { const [principal, cs] = partesSw(ms); return [principal, Object.assign(document.createElement("span"), { className: "ms", textContent: cs })]; };
 
-function swElapsed() { return swAcc + (swRaf ? Date.now() - swT0 : 0); }
+const swElapsed = () => swAcc + (swRaf ? Date.now() - swT0 : 0);
 
 function swRender() {
-  const el = $("swDisplay");
-  if (el) el.innerHTML = fmtSw(swElapsed());
+  $("swDisplay").replaceChildren(...tempoSw(swElapsed()));
   if (swRaf) swRaf = requestAnimationFrame(swRender);
 }
 
-on("swStart", e => {
-  const btn = e.currentTarget;
+function swToggle() {
+  const btn = $("swStart");
   if (swRaf) {
     swAcc += Date.now() - swT0;
     cancelAnimationFrame(swRaf);
@@ -146,77 +180,80 @@ on("swStart", e => {
     btn.textContent = "Pausar";
     btn.classList.remove("primary");
   }
-});
+}
 
-on("swLap", () => {
-  const el = swElapsed();
-  if (!el) return;
-  const list = $("swLaps");
-  if (!list) return;
+function swLap() {
+  const ms = swElapsed();
+  if (!ms) return;
   const li = document.createElement("li");
-  li.innerHTML = `Volta ${++swLapCount} — ${fmtSw(el)}`;
-  list.prepend(li);
-});
+  li.append(`Volta ${++swLapCount} — `, ...tempoSw(ms));
+  $("swLaps").prepend(li);
+}
 
-on("swReset", () => {
+function swReset() {
   if (swRaf) cancelAnimationFrame(swRaf);
   swRaf = null; swAcc = 0; swLapCount = 0;
-  const btn = $("swStart");
-  if (btn) { btn.textContent = "Iniciar"; btn.classList.add("primary"); }
-  const list = $("swLaps");
-  if (list) list.innerHTML = "";
+  $("swStart").textContent = "Iniciar";
+  $("swStart").classList.add("primary");
+  $("swLaps").replaceChildren();
   swRender();
-});
+}
 
+on("swStart", swToggle);
+on("swLap", swLap);
+on("swReset", swReset);
 swRender();
 
 /* ==========================================================
    3. TEMPORIZADOR
    ========================================================== */
 let tmEnd = 0, tmRemain = 0, tmInt = null;
+const tituloOriginal = document.title;
 
-const fmtTm = ms => {
+const fmtTm = (ms) => {
   const t = Math.max(0, Math.ceil(ms / 1000));
   return `${pad(Math.floor(t / 3600))}:${pad(Math.floor(t / 60) % 60)}:${pad(t % 60)}`;
 };
 
 function tmRender() {
-  const el = $("tmDisplay");
-  if (el) el.textContent = fmtTm(tmRemain);
+  $("tmDisplay").textContent = fmtTm(tmRemain);
+  document.title = tmInt ? `${fmtTm(tmRemain)} · Virada` : beeper.tocando ? "⏰ Tempo! · Virada" : tituloOriginal;
 }
 
-function readInputs() {
-  const h = +($("tmH")?.value || 0);
-  const m = +($("tmM")?.value || 0);
-  const s = +($("tmS")?.value || 0);
-  return (h * 3600 + m * 60 + s) * 1000;
-}
+// Lê os campos dentro dos limites (99 h, 59 min, 59 s): número estranho não vira um tempo absurdo.
+const campo = (id, max) => Math.min(max, Math.max(0, Math.floor(Number($(id).value) || 0)));
+const readInputs = () => (campo("tmH", 99) * 3600 + campo("tmM", 59) * 60 + campo("tmS", 59)) * 1000;
 
-document.querySelectorAll(".presets button").forEach(b => {
+for (const b of document.querySelectorAll(".presets button")) {
   b.addEventListener("click", () => {
-    if ($("tmH")) $("tmH").value = "";
-    if ($("tmM")) $("tmM").value = b.dataset.min;
-    if ($("tmS")) $("tmS").value = "";
-    tmRemain = +b.dataset.min * 60000;
+    $("tmH").value = "";
+    $("tmM").value = b.dataset.min;
+    $("tmS").value = "";
+    tmRemain = Number(b.dataset.min) * 60000;
     tmRender();
   });
-});
+}
 
-on("tmStart", e => {
-  const btn = e.currentTarget;
+function pararAlarme() {
+  beeper.stop();
+  $("tmStop").classList.add("hidden");
+  tmRender();
+}
 
+function tmToggle() {
+  const btn = $("tmStart");
   if (tmInt) {                                  // pausar
     tmRemain = tmEnd - Date.now();
     clearInterval(tmInt); tmInt = null;
     btn.textContent = "Iniciar";
     btn.classList.add("primary");
+    tmRender();
     return;
   }
-
   if (tmRemain <= 0) tmRemain = readInputs();
   if (tmRemain <= 0) return;
 
-  beeper._ensure();                             // libera áudio no clique
+  beeper._ensure();                             // libera o som no toque
   tmEnd = Date.now() + tmRemain;
   btn.textContent = "Pausar";
   btn.classList.remove("primary");
@@ -228,26 +265,44 @@ on("tmStart", e => {
       clearInterval(tmInt); tmInt = null;
       btn.textContent = "Iniciar";
       btn.classList.add("primary");
-      $("tmStop")?.classList.remove("hidden");
+      $("tmStop").classList.remove("hidden");
       beeper.start();
     }
     tmRender();
   }, 100);
-});
+  tmRender();   // já mostra o tempo, sem esperar o primeiro passo
+}
 
-on("tmReset", () => {
+function tmReset() {
   clearInterval(tmInt); tmInt = null;
   tmRemain = 0;
-  beeper.stop();
-  $("tmStop")?.classList.add("hidden");
-  const btn = $("tmStart");
-  if (btn) { btn.textContent = "Iniciar"; btn.classList.add("primary"); }
+  pararAlarme();
+  $("tmStart").textContent = "Iniciar";
+  $("tmStart").classList.add("primary");
   tmRender();
-});
+}
 
-on("tmStop", () => {
-  beeper.stop();
-  $("tmStop")?.classList.add("hidden");
-});
-
+on("tmStart", tmToggle);
+on("tmReset", tmReset);
+on("tmStop", pararAlarme);
 tmRender();
+
+/* ==========================================================
+   4. TECLADO (o README já prometia): Espaço, L, R e Esc
+   ========================================================== */
+document.addEventListener("keydown", (e) => {
+  if (e.target.matches("input, textarea") || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tecla = e.key.toLowerCase();
+  if (tecla === "escape" && beeper.tocando) { pararAlarme(); return; }
+  if (e.target.matches("button") && (tecla === " " || tecla === "enter")) return;   // o botão em foco faz o dele
+  if (tecla === " ") {
+    e.preventDefault();
+    if (beeper.tocando) pararAlarme();
+    else if (painelAberto === "stopwatch") swToggle();
+    else if (painelAberto === "timer") tmToggle();
+  } else if (tecla === "l" && painelAberto === "stopwatch") swLap();
+  else if (tecla === "r") {
+    if (painelAberto === "stopwatch") swReset();
+    else if (painelAberto === "timer") tmReset();
+  }
+});
