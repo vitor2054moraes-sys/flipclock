@@ -2,23 +2,30 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flip Clock</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Segurança: só arquivos deste site (nada de script embutido ou de fora). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="theme-color" content="#000000">
+<title>Virada — relógio de virar</title>
+<link rel="icon" href="icone.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="wrap">
-
-  <nav class="tabs">
-    <button class="tab active" data-panel="clock">Relógio</button>
-    <button class="tab" data-panel="stopwatch">Cronômetro</button>
-    <button class="tab" data-panel="timer">Temporizador</button>
-  </nav>
+  <header class="topo">
+    <p class="marca">Virada</p>
+    <nav class="tabs" role="tablist" aria-label="Partes">
+      <button class="tab active" role="tab" aria-selected="true" aria-controls="clock" data-panel="clock">Relógio</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="stopwatch" data-panel="stopwatch">Cronômetro</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="timer" data-panel="timer">Temporizador</button>
+    </nav>
+  </header>
 
   <!-- ================= RELÓGIO ================= -->
-  <section class="panel active" id="clock">
-    <div class="clock">
+  <section class="panel active" id="clock" role="tabpanel" aria-label="Relógio">
+    <p class="oculto" id="horaLida" aria-live="polite"></p>
+    <div class="clock" aria-hidden="true">
       <span id="meridiem">AM</span>
 
       <div class="flip-card" id="c-h">
@@ -37,12 +44,16 @@
 
       <div class="seconds" id="c-s">00</div>
     </div>
+    <p class="data" id="data"></p>
 
-    <button id="formatToggle">24h</button>
+    <div class="controls">
+      <button id="formatToggle" aria-label="Formato da hora">24h</button>
+      <button id="telaCheia">Tela cheia</button>
+    </div>
   </section>
 
   <!-- ================= CRONÔMETRO ================= -->
-  <section class="panel" id="stopwatch">
+  <section class="panel" id="stopwatch" role="tabpanel" aria-label="Cronômetro">
     <div class="digital" id="swDisplay">00:00<span class="ms">.00</span></div>
 
     <div class="controls">
@@ -50,20 +61,24 @@
       <button id="swLap">Volta</button>
       <button id="swReset">Zerar</button>
     </div>
+    <p class="dica">Teclado: Espaço inicia/pausa · L marca volta · R zera</p>
 
     <ol class="laps" id="swLaps"></ol>
   </section>
 
   <!-- ================= TEMPORIZADOR ================= -->
-  <section class="panel" id="timer">
+  <section class="panel" id="timer" role="tabpanel" aria-label="Temporizador">
     <div class="digital" id="tmDisplay">00:00:00</div>
 
     <div class="timer-inputs" id="tmInputs">
-      <input type="number" id="tmH" min="0" max="99" placeholder="hh">
-      <span>:</span>
-      <input type="number" id="tmM" min="0" max="59" placeholder="mm">
-      <span>:</span>
-      <input type="number" id="tmS" min="0" max="59" placeholder="ss">
+      <label class="oculto" for="tmH">Horas</label>
+      <input type="number" id="tmH" min="0" max="99" placeholder="hh" inputmode="numeric">
+      <span aria-hidden="true">:</span>
+      <label class="oculto" for="tmM">Minutos</label>
+      <input type="number" id="tmM" min="0" max="59" placeholder="mm" inputmode="numeric">
+      <span aria-hidden="true">:</span>
+      <label class="oculto" for="tmS">Segundos</label>
+      <input type="number" id="tmS" min="0" max="59" placeholder="ss" inputmode="numeric">
     </div>
 
     <div class="presets">
@@ -78,6 +93,7 @@
       <button id="tmReset">Zerar</button>
       <button id="tmStop" class="danger hidden">Parar alarme</button>
     </div>
+    <p class="dica">Teclado: Espaço inicia/pausa (ou cala o alarme) · R zera</p>
   </section>
 
 </div>

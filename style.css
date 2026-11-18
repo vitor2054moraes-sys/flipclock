@@ -1,5 +1,8 @@
+/* Virada — aparência: fundo preto, números brancos, virada 3D. Medidas e cores nas regras abaixo. */
 /* ---------- BASE ---------- */
 * { box-sizing: border-box; }
+:focus-visible { outline: 3px solid #f2f2f2; outline-offset: 3px; }
+.oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 html, body {
   margin: 0;
@@ -11,13 +14,18 @@ html, body {
 
 .wrap {
   max-width: 1100px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 32px 20px 60px;
+  padding: 24px 16px 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
 }
+
+/* ---------- TOPO ---------- */
+.topo { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.marca { margin: 0; color: #888; font-size: 13px; font-weight: 800; letter-spacing: .3em; text-transform: uppercase; }
 
 /* ---------- ABAS ---------- */
 .tabs { display: flex; gap: 8px; }
@@ -35,7 +43,8 @@ html, body {
 .tab:hover  { color: #f2f2f2; border-color: #666; }
 .tab.active { background: #f2f2f2; color: #000; border-color: #f2f2f2; }
 
-.panel { display: none; flex-direction: column; align-items: center; gap: 28px; }
+.panel { display: none; flex-direction: column; align-items: center; gap: 24px; }
+#clock.panel.active { flex: 1; justify-content: center; }   /* o relógio no meio da tela */
 .panel.active { display: flex; }
 
 .hidden { display: none !important; }
@@ -123,6 +132,11 @@ html, body {
   align-self: flex-start;
   padding-top: 24px;
 }
+#meridiem.escondido { display: none; }
+.data { margin: -6px 0 0; color: #aaa; font-size: 18px; }
+.data::first-letter { text-transform: uppercase; }
+.dica { margin: -10px 0 0; color: #777; font-size: 13px; text-align: center; }
+@media (pointer: coarse) { .dica { display: none; } }   /* celular: sem teclado */
 
 /* ---------- CRONÔMETRO / TEMPORIZADOR ---------- */
 .digital {
@@ -199,8 +213,15 @@ button.danger  { border-color: #7a2222; color: #ff8a8a; }
 }
 
 @media (max-width: 400px) {
-  .flip-card { --h: 96px; width: 118px; font-size: 76px; }
+  .flip-card { --h: 116px; width: 140px; font-size: 90px; }
   .seconds { font-size: 26px; }
   .digital { font-size: 40px; padding: 14px 18px; }
+  .tab { padding: 10px 16px; }
 }
+
+/* ---------- TELA CHEIA (relógio de mesa): só o relógio, o maior possível ---------- */
+body.cheia .topo, body.cheia #clock .controls { opacity: 0; transition: opacity .3s; }
+body.cheia .topo:hover, body.cheia #clock .controls:hover, body.cheia #clock .controls:focus-within { opacity: 1; }
+body.cheia .flip-card { --h: min(40vh, 34vw); width: min(46vh, 40vw); font-size: min(32vh, 28vw); }
+body.cheia .seconds { font-size: min(8vh, 6vw); }
 
